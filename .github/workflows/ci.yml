@@ -1,0 +1,38 @@
+name: Go CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run go fmt
+        run: gofmt -w $(go list -f '{{.Dir}}' ./... | tr '\n' ' ')
+
+      - name: Run go test
+        run: go test ./...
+
+      - name: Build services
+        run: |
+          for dir in $(go list -f '{{.Dir}}' ./...); do
+            (cd "$dir" && if [ -f main.go ]; then go build ./...; fi)
+          done
+
+      - name: Docker build
+        if: false
+        run: echo "Add Docker build commands here"
+
