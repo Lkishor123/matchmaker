@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  auth:
+    build: ./cmd/auth
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+  chat:
+    build: ./cmd/chat
+    ports:
+      - "8082:8080"
+    depends_on:
+      - redis
+  match:
+    build: ./cmd/match
+    ports:
+      - "8083:8080"
+    depends_on:
+      - postgres
+  user:
+    build: ./cmd/user
+    ports:
+      - "8084:8080"
+    depends_on:
+      - postgres
+  astrology_report:
+    build: ./cmd/astrology_report
+    ports:
+      - "8085:8080"
+    depends_on:
+      - mongodb
+      - redis
