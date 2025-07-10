@@ -92,6 +92,9 @@ Services use the following environment variables. Create a `.env` file or export
 | `GOOGLE_OAUTH_REDIRECT_URL` | OAuth callback URL used by the Auth Service |
 | `USER_SERVICE_URL` | Endpoint of the User Service |
 | `REPORT_SERVICE_URL` | Endpoint of the Astrology Report Service |
+| `AUTH_SERVICE_URL` | Endpoint of the Auth Service |
+| `MATCH_SERVICE_URL` | Endpoint of the Match Analysis Service |
+| `CHAT_SERVICE_URL` | Endpoint of the AI Chat Service |
 | `LLM_API_URL` | Endpoint of the LLM provider for the Chat Service |
 
 ## Third-Party Dependencies
