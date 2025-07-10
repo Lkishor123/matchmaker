@@ -1,9 +1,7 @@
 package main
 
 import (
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-
+	"matchmaker/internal/database"
 	"matchmaker/internal/handlers"
 	"matchmaker/internal/logging"
 	"matchmaker/internal/models"
@@ -11,13 +9,22 @@ import (
 
 func main() {
 	logging.Init()
+	if _, err := database.Init(); err != nil {
+		logging.Log.Fatal("database initialization failed")
+	}
+	if err := database.DB.AutoMigrate(&models.User{}, &models.BirthDetail{}); err != nil {
+		logging.Log.WithError(err).Fatal("auto-migrate failed")
+	}
+
 	r := logging.NewGinEngine()
 	r.GET("/ping", handlers.Ping)
 
-	// Placeholder GORM initialization to reference the library.
-	dsn := "host=localhost user=gorm dbname=gorm password=gorm sslmode=disable"
-	_, _ = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	_ = models.User{}
+	r.POST("/internal/v1/users", handlers.CreateUser)
+
+	api := r.Group("/api/v1")
+	api.Use(handlers.RequireUserID())
+	api.GET("/users/me", handlers.GetMe)
+	api.PUT("/users/me", handlers.UpdateMe)
 
 	r.Run()
 }
