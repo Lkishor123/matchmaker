@@ -1,19 +1,22 @@
 package main
 
 import (
-	"github.com/gorilla/websocket"
-
+	"matchmaker/internal/database"
 	"matchmaker/internal/handlers"
 	"matchmaker/internal/logging"
 )
 
 func main() {
 	logging.Init()
+	if _, err := database.InitRedis(); err != nil {
+		logging.Log.Fatal("redis initialization failed")
+	}
 	r := logging.NewGinEngine()
 	r.GET("/ping", handlers.Ping)
 
-	// Placeholder websocket usage to reference the library.
-	_ = websocket.Upgrader{}
+	api := r.Group("/api/v1")
+	api.Use(handlers.RequireUserID())
+	api.GET("/chat", handlers.Chat)
 
 	r.Run()
 }
