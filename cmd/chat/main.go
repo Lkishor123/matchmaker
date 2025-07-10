@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 
 	"matchmaker/internal/handlers"
+	"matchmaker/internal/logging"
 )
 
 func main() {
-	r := gin.Default()
+	logging.Init()
+	r := logging.NewGinEngine()
 	r.GET("/ping", handlers.Ping)
 
 	// Placeholder websocket usage to reference the library.

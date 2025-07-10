@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 
 	"matchmaker/internal/handlers"
+	"matchmaker/internal/logging"
 )
 
 func main() {
-	r := gin.Default()
+	logging.Init()
+	r := logging.NewGinEngine()
 	r.GET("/ping", handlers.Ping)
 
 	// Example usage of jwt-go to ensure dependency is referenced.

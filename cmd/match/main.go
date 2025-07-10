@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"matchmaker/internal/handlers"
+	"matchmaker/internal/logging"
 )
 
 func main() {
-	r := gin.Default()
+	logging.Init()
+	r := logging.NewGinEngine()
 	r.GET("/ping", handlers.Ping)
 
 	r.Run()

@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 
-	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"matchmaker/internal/handlers"
+	"matchmaker/internal/logging"
 )
 
 func main() {
-	r := gin.Default()
+	logging.Init()
+	r := logging.NewGinEngine()
 	r.GET("/ping", handlers.Ping)
 
 	// Placeholder MongoDB and Redis initialization to reference libraries.
