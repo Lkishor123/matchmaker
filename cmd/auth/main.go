@@ -9,7 +9,6 @@ import (
 	"encoding/pem"
 	"io"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +16,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
+	"matchmaker/internal/config"
 	"matchmaker/internal/handlers"
 	"matchmaker/internal/logging"
 )
@@ -30,10 +30,15 @@ var (
 func main() {
 	logging.Init()
 
+	cfg, err := config.LoadAuth()
+	if err != nil {
+		logging.Log.WithError(err).Fatal("config error")
+	}
+
 	oauthConfig = &oauth2.Config{
-		ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-		RedirectURL:  getenv("GOOGLE_OAUTH_REDIRECT_URL", "http://localhost:8081/api/v1/auth/google/callback"),
+		ClientID:     cfg.GoogleClientID,
+		ClientSecret: cfg.GoogleClientSecret,
+		RedirectURL:  cfg.GoogleRedirectURL,
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
 			"https://www.googleapis.com/auth/userinfo.profile",
@@ -41,7 +46,7 @@ func main() {
 		Endpoint: google.Endpoint,
 	}
 
-	keyData := os.Getenv("JWT_PRIVATE_KEY")
+	keyData := cfg.JWTPrivateKey
 	if keyData != "" {
 		block, _ := pem.Decode([]byte(keyData))
 		if block != nil {
@@ -53,7 +58,7 @@ func main() {
 		}
 	}
 
-	userServiceURL = getenv("USER_SERVICE_URL", "http://localhost:8084")
+	userServiceURL = cfg.UserServiceURL
 
 	r := logging.NewGinEngine()
 	r.GET("/ping", handlers.Ping)
@@ -64,13 +69,6 @@ func main() {
 	_ = jwt.New(jwt.SigningMethodHS256)
 
 	r.Run()
-}
-
-func getenv(key, def string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return def
 }
 
 func googleLoginHandler(c *gin.Context) {

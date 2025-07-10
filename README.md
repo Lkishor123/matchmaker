@@ -89,6 +89,10 @@ Services use the following environment variables. Create a `.env` file or export
 | `ASTROLOGY_ENGINE_URL` | Endpoint of the external astrology engine |
 | `ASTROLOGY_ENGINE_API_KEY` | API key for the astrology engine |
 | `LLM_API_KEY` | API key for the chat service's LLM provider |
+| `GOOGLE_OAUTH_REDIRECT_URL` | OAuth callback URL used by the Auth Service |
+| `USER_SERVICE_URL` | Endpoint of the User Service |
+| `REPORT_SERVICE_URL` | Endpoint of the Astrology Report Service |
+| `LLM_API_URL` | Endpoint of the LLM provider for the Chat Service |
 
 ## Third-Party Dependencies
 

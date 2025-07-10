@@ -1,6 +1,7 @@
 package main
 
 import (
+	"matchmaker/internal/config"
 	"matchmaker/internal/database"
 	"matchmaker/internal/handlers"
 	"matchmaker/internal/logging"
@@ -9,6 +10,9 @@ import (
 
 func main() {
 	logging.Init()
+	if _, err := config.LoadUser(); err != nil {
+		logging.Log.Fatal(err)
+	}
 	if _, err := database.Init(); err != nil {
 		logging.Log.Fatal("database initialization failed")
 	}

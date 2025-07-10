@@ -1,6 +1,7 @@
 package main
 
 import (
+	"matchmaker/internal/config"
 	"matchmaker/internal/database"
 	"matchmaker/internal/handlers"
 	"matchmaker/internal/logging"
@@ -8,6 +9,9 @@ import (
 
 func main() {
 	logging.Init()
+	if _, err := config.LoadReport(); err != nil {
+		logging.Log.Fatal(err)
+	}
 	if _, err := database.InitMongo(); err != nil {
 		logging.Log.Fatal("mongodb initialization failed")
 	}

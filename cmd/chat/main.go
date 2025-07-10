@@ -1,6 +1,7 @@
 package main
 
 import (
+	"matchmaker/internal/config"
 	"matchmaker/internal/database"
 	"matchmaker/internal/handlers"
 	"matchmaker/internal/logging"
@@ -8,6 +9,9 @@ import (
 
 func main() {
 	logging.Init()
+	if _, err := config.LoadChat(); err != nil {
+		logging.Log.Fatal(err)
+	}
 	if _, err := database.InitRedis(); err != nil {
 		logging.Log.Fatal("redis initialization failed")
 	}
