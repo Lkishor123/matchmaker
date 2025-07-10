@@ -21,7 +21,7 @@ func NewGinEngine() *gin.Engine {
 		Init()
 	}
 	engine := gin.New()
-	engine.Use(gin.RecoveryWithWriter(Log.Writer()))
+	engine.Use(gin.RecoveryWithWriter(Log.WriterLevel(logrus.ErrorLevel)))
 	engine.Use(requestLogger())
 	return engine
 }

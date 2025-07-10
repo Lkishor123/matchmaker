@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"matchmaker/internal/httputil"
 	"matchmaker/internal/logging"
 )
 
@@ -28,7 +29,7 @@ func CreateAnalysis(c *gin.Context) {
 	var req AnalysisRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logging.Log.WithError(err).Warn("invalid analysis payload")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		httputil.JSONError(c, http.StatusBadRequest, "invalid request")
 		return
 	}
 
@@ -76,7 +77,7 @@ func CreateAnalysis(c *gin.Context) {
 	for _, err := range errs {
 		if err != nil {
 			logging.Log.WithError(err).Error("failed to fetch report")
-			c.JSON(http.StatusBadGateway, gin.H{"error": "report service error"})
+			httputil.JSONError(c, http.StatusBadGateway, "report service error")
 			logging.Log.WithField("latency", time.Since(start)).Info("analysis request finished")
 			return
 		}

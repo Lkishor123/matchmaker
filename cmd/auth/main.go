@@ -18,6 +18,7 @@ import (
 
 	"matchmaker/internal/config"
 	"matchmaker/internal/handlers"
+	"matchmaker/internal/httputil"
 	"matchmaker/internal/logging"
 )
 
@@ -74,7 +75,7 @@ func main() {
 func googleLoginHandler(c *gin.Context) {
 	if oauthConfig == nil {
 		logging.Log.Error("oauth config not initialized")
-		c.Status(http.StatusInternalServerError)
+		httputil.JSONError(c, http.StatusInternalServerError, "internal error")
 		return
 	}
 	url := oauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
@@ -86,14 +87,14 @@ func googleCallbackHandler(c *gin.Context) {
 	code := c.Query("code")
 	if code == "" {
 		logging.Log.Warn("missing code in callback")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing code"})
+		httputil.JSONError(c, http.StatusBadRequest, "missing code")
 		return
 	}
 
 	tok, err := oauthConfig.Exchange(context.Background(), code)
 	if err != nil {
 		logging.Log.WithError(err).Error("token exchange failed")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "token exchange failed"})
+		httputil.JSONError(c, http.StatusBadRequest, "token exchange failed")
 		return
 	}
 
@@ -101,14 +102,14 @@ func googleCallbackHandler(c *gin.Context) {
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
 		logging.Log.WithError(err).Error("failed to fetch user info")
-		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to fetch user info"})
+		httputil.JSONError(c, http.StatusBadGateway, "failed to fetch user info")
 		return
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		logging.Log.WithField("status", resp.StatusCode).WithField("body", string(body)).Error("google userinfo returned non-200")
-		c.JSON(http.StatusBadGateway, gin.H{"error": "google userinfo failed"})
+		httputil.JSONError(c, http.StatusBadGateway, "google userinfo failed")
 		return
 	}
 
@@ -118,7 +119,7 @@ func googleCallbackHandler(c *gin.Context) {
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&gUser); err != nil {
 		logging.Log.WithError(err).Error("failed to decode user info")
-		c.JSON(http.StatusBadGateway, gin.H{"error": "invalid user info"})
+		httputil.JSONError(c, http.StatusBadGateway, "invalid user info")
 		return
 	}
 
@@ -129,21 +130,21 @@ func googleCallbackHandler(c *gin.Context) {
 	})
 	if err != nil {
 		logging.Log.WithError(err).Error("failed to marshal user request")
-		c.Status(http.StatusInternalServerError)
+		httputil.JSONError(c, http.StatusInternalServerError, "internal error")
 		return
 	}
 
 	usResp, err := http.Post(userServiceURL+"/internal/v1/users", "application/json", bytes.NewReader(body))
 	if err != nil {
 		logging.Log.WithError(err).Error("user service request failed")
-		c.JSON(http.StatusBadGateway, gin.H{"error": "user service unavailable"})
+		httputil.JSONError(c, http.StatusBadGateway, "user service unavailable")
 		return
 	}
 	defer usResp.Body.Close()
 	if usResp.StatusCode != http.StatusOK && usResp.StatusCode != http.StatusCreated {
 		b, _ := io.ReadAll(usResp.Body)
 		logging.Log.WithFields(map[string]interface{}{"status": usResp.StatusCode, "body": string(b)}).Error("user service returned error")
-		c.JSON(http.StatusBadGateway, gin.H{"error": "user service error"})
+		httputil.JSONError(c, http.StatusBadGateway, "user service error")
 		return
 	}
 	var userResp struct {
@@ -151,13 +152,13 @@ func googleCallbackHandler(c *gin.Context) {
 	}
 	if err := json.NewDecoder(usResp.Body).Decode(&userResp); err != nil {
 		logging.Log.WithError(err).Error("failed to decode user service response")
-		c.JSON(http.StatusBadGateway, gin.H{"error": "invalid user service response"})
+		httputil.JSONError(c, http.StatusBadGateway, "invalid user service response")
 		return
 	}
 
 	if jwtPrivateKey == nil {
 		logging.Log.Error("jwt private key not configured")
-		c.Status(http.StatusInternalServerError)
+		httputil.JSONError(c, http.StatusInternalServerError, "internal error")
 		return
 	}
 
@@ -173,7 +174,7 @@ func googleCallbackHandler(c *gin.Context) {
 	signed, err := token.SignedString(jwtPrivateKey)
 	if err != nil {
 		logging.Log.WithError(err).Error("failed to sign jwt")
-		c.Status(http.StatusInternalServerError)
+		httputil.JSONError(c, http.StatusInternalServerError, "internal error")
 		return
 	}
 

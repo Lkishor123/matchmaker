@@ -19,6 +19,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"matchmaker/internal/database"
+	"matchmaker/internal/httputil"
 	"matchmaker/internal/logging"
 )
 
@@ -34,7 +35,7 @@ func CreateReport(c *gin.Context) {
 	var bd BirthDetails
 	if err := c.ShouldBindJSON(&bd); err != nil {
 		logging.Log.WithError(err).Warn("invalid report payload")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		httputil.JSONError(c, http.StatusBadRequest, "invalid request")
 		return
 	}
 
@@ -65,7 +66,7 @@ func CreateReport(c *gin.Context) {
 	data, err := fetchFromEngine(ctx, bd)
 	if err != nil {
 		logging.Log.WithError(err).Error("engine request failed")
-		c.JSON(http.StatusBadGateway, gin.H{"error": "engine error"})
+		httputil.JSONError(c, http.StatusBadGateway, "engine error")
 		return
 	}
 
