@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"matchmaker/internal/handlers"
+	"matchmaker/internal/logging"
 	"matchmaker/internal/models"
 )
 
 func main() {
-	r := gin.Default()
+	logging.Init()
+	r := logging.NewGinEngine()
 	r.GET("/ping", handlers.Ping)
 
 	// Placeholder GORM initialization to reference the library.

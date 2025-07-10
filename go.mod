@@ -7,6 +7,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/gorilla/websocket v1.5.3
 	github.com/redis/go-redis/v9 v9.11.0
+	github.com/sirupsen/logrus v1.9.3
 	go.mongodb.org/mongo-driver v1.17.4
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
