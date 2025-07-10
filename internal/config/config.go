@@ -135,3 +135,27 @@ func LoadChat() (*Chat, error) {
 	}
 	return cfg, nil
 }
+
+// Gateway holds configuration for the API gateway.
+type Gateway struct {
+	AuthServiceURL  string
+	UserServiceURL  string
+	MatchServiceURL string
+	ChatServiceURL  string
+	JWTPrivateKey   string
+}
+
+// LoadGateway loads configuration for the gateway service.
+func LoadGateway() (*Gateway, error) {
+	key, err := require("JWT_PRIVATE_KEY")
+	if err != nil {
+		return nil, err
+	}
+	return &Gateway{
+		AuthServiceURL:  getenv("AUTH_SERVICE_URL", "http://localhost:8081"),
+		UserServiceURL:  getenv("USER_SERVICE_URL", "http://localhost:8084"),
+		MatchServiceURL: getenv("MATCH_SERVICE_URL", "http://localhost:8083"),
+		ChatServiceURL:  getenv("CHAT_SERVICE_URL", "http://localhost:8082"),
+		JWTPrivateKey:   key,
+	}, nil
+}

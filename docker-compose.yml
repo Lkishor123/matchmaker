@@ -46,3 +46,14 @@ services:
     depends_on:
       - mongodb
       - redis
+
+  gateway:
+    build: ./cmd/gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth
+      - chat
+      - match
+      - user
+      - astrology_report
